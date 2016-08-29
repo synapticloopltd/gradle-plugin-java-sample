@@ -33,15 +33,20 @@
  - [Creating a new plugin](#documentr_heading_17)
    - [Required Information](#documentr_heading_18)
    - [Step 1 - create the .properties file](#documentr_heading_19)
- - [Building the Package](#documentr_heading_20)
-   - [*NIX/Mac OS X](#documentr_heading_21)
-   - [Windows](#documentr_heading_22)
- - [Running the Tests](#documentr_heading_23)
-   - [*NIX/Mac OS X](#documentr_heading_24)
-   - [Windows](#documentr_heading_25)
-   - [Dependencies - Gradle](#documentr_heading_26)
-   - [Dependencies - Maven](#documentr_heading_27)
-   - [Dependencies - Downloads](#documentr_heading_28)
+   - [Step 2 - create the Plugin.java file](#documentr_heading_20)
+   - [Step 3 - create the PluginExtension.java file](#documentr_heading_21)
+   - [Step 4 - create the Task.java file](#documentr_heading_22)
+   - [Step 5 - create the build-initial.gradle file](#documentr_heading_23)
+   - [Step 6 - create the build.gradle file](#documentr_heading_24)
+ - [Building the Package](#documentr_heading_25)
+   - [*NIX/Mac OS X](#documentr_heading_26)
+   - [Windows](#documentr_heading_27)
+ - [Running the Tests](#documentr_heading_28)
+   - [*NIX/Mac OS X](#documentr_heading_29)
+   - [Windows](#documentr_heading_30)
+   - [Dependencies - Gradle](#documentr_heading_31)
+   - [Dependencies - Maven](#documentr_heading_32)
+   - [Dependencies - Downloads](#documentr_heading_33)
 
 
 
@@ -68,7 +73,7 @@ The first thing that is going to happen when you try to build the project is tha
 
 
 ```
-gradled build
+gradle build
 
 
 FAILURE: Build failed with an exception.
@@ -479,8 +484,10 @@ gradle pP
 ## Required Information <sup><sup>[top](#documentr_top)</sup></sup>
 
  - plugin group - referred to as `«PLUGIN_GROUP»`
+ - plugin description = referred to as `«PLUGIN_DESCRIPTION»`
  - plugin name - referred to as `«PLUGIN_NAME»`
  - plugin package - referred to as `«PLUGIN.PACKAGE»`
+ - plugin path - referred to as `«PLUGIN_PATH»` - this should match the plugin package as per java conventions
 
 
 
@@ -494,7 +501,7 @@ Create a file located at:
 
 
 ```
-src/main/resources/META-INF/`«PLUGIN_GROUP»`.`«PLUGIN_NAME»`.properties
+src/main/resources/META-INF/«PLUGIN_GROUP».«PLUGIN_NAME».properties
 ```
 
 
@@ -504,9 +511,8 @@ Enter the following details:
 
 
 ```
-implementation-class=`«PLUGIN_GROUP»`.`«PLUGIN_NAME»`Plugin
+implementation-class=«PLUGIN_GROUP».«PLUGIN_NAME»Plugin
 ```
-
 
 
 
@@ -514,11 +520,173 @@ implementation-class=`«PLUGIN_GROUP»`.`«PLUGIN_NAME»`Plugin
 
 <a name="documentr_heading_20"></a>
 
-# Building the Package <sup><sup>[top](#documentr_top)</sup></sup>
+## Step 2 - create the `Plugin.java` file <sup><sup>[top](#documentr_top)</sup></sup>
+
+Create a file located at:
+
+
+
+```
+src/main/java/«PLUGIN_PATH»/«PLUGIN_NAME»Plugin.java
+```
+
+
+
+This **MUST** match the `implementation-class` listed as per Step 1
+
+The file should contain the following
+
+
+
+```
+package «PLUGIN.PACKAGE»;
+
+import org.gradle.api.Plugin;
+import org.gradle.api.Project;
+
+public class «PLUGIN_NAME»Plugin implements Plugin<Project> {
+
+	@Override
+	public void apply(Project project) {
+		project.getExtensions().create("«PLUGIN_NAME»", «PLUGIN_NAME»PluginExtension.class);
+
+		project.getTasks().create("«PLUGIN_TASK_NAME»", «PLUGIN_NAME»Task.class);
+	}
+}
+
+```
+
+
 
 
 
 <a name="documentr_heading_21"></a>
+
+## Step 3 - create the `PluginExtension.java` file <sup><sup>[top](#documentr_top)</sup></sup>
+
+Create a file located at:
+
+
+
+```
+src/main/java/«PLUGIN_PATH»/«PLUGIN_NAME»PluginExtension.java
+```
+
+
+
+The file should contain the following:
+
+
+
+```
+package «PLUGIN.PACKAGE»;
+
+
+public class «PLUGIN_NAME»PluginExtension {
+	// here you can put your member variables
+
+	// don't forget to create getters/setters for all of the member variables
+}
+```
+
+
+
+
+
+<a name="documentr_heading_22"></a>
+
+## Step 4 - create the `Task.java` file <sup><sup>[top](#documentr_top)</sup></sup>
+
+Create a file located at:
+
+
+
+```
+src/main/java/«PLUGIN_PATH»/«PLUGIN_NAME»Task.java
+```
+
+
+
+The file should contain the following:
+
+
+
+```
+package «PLUGIN.PACKAGE»;
+
+import org.gradle.api.DefaultTask;
+import org.gradle.api.logging.Logger;
+import org.gradle.api.tasks.TaskAction;
+
+public class «PLUGIN_NAME»Task extends DefaultTask {
+	private Logger logger;
+	private «PLUGIN_NAME»PluginExtension extension;
+
+	public JavaSampleHelloTask() {
+		setGroup("«PLUGIN_GROUP»");
+		setDescription("«PLUGIN_DESCRIPTION»");
+
+		this.logger = getProject().getLogger();
+	}
+
+	@TaskAction
+	public void generate() {
+		extension = getProject().getExtensions().findByType(«PLUGIN_NAME»PluginExtension.class);
+
+		if (extension == null) {
+			extension = new «PLUGIN_NAME»Extension();
+		}
+
+		logger.info("Logging something, this will only be seen if the gradle task is invoked with --info");
+	}
+}
+```
+
+
+
+
+
+<a name="documentr_heading_23"></a>
+
+## Step 5 - create the `build-initial.gradle` file <sup><sup>[top](#documentr_top)</sup></sup>
+
+Use the `./build-initial.gradle` file as a starting point, you will need to 
+update the following values:
+
+
+
+```
+// textual information for this project
+group = '«PLUGIN_ARTEFACT_BASE»'
+archivesBaseName = '«PLUGIN_NAME»'
+description = """«PLUGIN_DESCRIPTION»"""
+
+version = '1.0.0'
+```
+
+
+
+
+
+<a name="documentr_heading_24"></a>
+
+## Step 6 - create the `build.gradle` file <sup><sup>[top](#documentr_top)</sup></sup>
+
+Use the `./build.gradle` file as a starting point, you will need to 
+update the values in the file as per step 5 above.
+
+
+
+
+
+
+<a name="documentr_heading_25"></a>
+
+# Building the Package <sup><sup>[top](#documentr_top)</sup></sup>
+
+
+
+<a name="documentr_heading_26"></a>
 
 ## *NIX/Mac OS X <sup><sup>[top](#documentr_top)</sup></sup>
 
@@ -529,7 +697,7 @@ From the root of the project, simply run
 
 
 
-<a name="documentr_heading_22"></a>
+<a name="documentr_heading_27"></a>
 
 ## Windows <sup><sup>[top](#documentr_top)</sup></sup>
 
@@ -542,13 +710,13 @@ Note that this may also run tests (if applicable see the Testing notes)
 
 
 
-<a name="documentr_heading_23"></a>
+<a name="documentr_heading_28"></a>
 
 # Running the Tests <sup><sup>[top](#documentr_top)</sup></sup>
 
 
 
-<a name="documentr_heading_24"></a>
+<a name="documentr_heading_29"></a>
 
 ## *NIX/Mac OS X <sup><sup>[top](#documentr_top)</sup></sup>
 
@@ -562,7 +730,7 @@ if you do not have gradle installed, try:
 
 
 
-<a name="documentr_heading_25"></a>
+<a name="documentr_heading_30"></a>
 
 ## Windows <sup><sup>[top](#documentr_top)</sup></sup>
 
@@ -579,7 +747,7 @@ The `--info` switch will also output logging for the tests
 
 
 
-<a name="documentr_heading_26"></a>
+<a name="documentr_heading_31"></a>
 
 ## Dependencies - Gradle <sup><sup>[top](#documentr_top)</sup></sup>
 
@@ -611,7 +779,7 @@ dependencies {
 
 
 
-<a name="documentr_heading_27"></a>
+<a name="documentr_heading_32"></a>
 
 ## Dependencies - Maven <sup><sup>[top](#documentr_top)</sup></sup>
 
@@ -630,7 +798,7 @@ dependencies {
 
 
 
-<a name="documentr_heading_28"></a>
+<a name="documentr_heading_33"></a>
 
 ## Dependencies - Downloads <sup><sup>[top](#documentr_top)</sup></sup>
 

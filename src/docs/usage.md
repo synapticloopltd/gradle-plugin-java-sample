@@ -3,7 +3,7 @@
 The first thing that is going to happen when you try to build the project is that it is going to fail:
 
 ```
-gradled build
+gradle build
 
 
 FAILURE: Build failed with an exception.
@@ -296,8 +296,10 @@ gradle pP
 ## Required Information
 
  - plugin group - referred to as `«PLUGIN_GROUP»`
+ - plugin description = referred to as `«PLUGIN_DESCRIPTION»`
  - plugin name - referred to as `«PLUGIN_NAME»`
  - plugin package - referred to as `«PLUGIN.PACKAGE»`
+ - plugin path - referred to as `«PLUGIN_PATH»` - this should match the plugin package as per java conventions
 
 
 ## Step 1 - create the `.properties` file
@@ -305,11 +307,124 @@ gradle pP
 Create a file located at:
 
 ```
-src/main/resources/META-INF/`«PLUGIN_GROUP»`.`«PLUGIN_NAME»`.properties
+src/main/resources/META-INF/«PLUGIN_GROUP».«PLUGIN_NAME».properties
 ```
 
 Enter the following details:
 
 ```
-implementation-class=`«PLUGIN_GROUP»`.`«PLUGIN_NAME»`Plugin
+implementation-class=«PLUGIN_GROUP».«PLUGIN_NAME»Plugin
 ```
+
+## Step 2 - create the `Plugin.java` file
+
+Create a file located at:
+
+```
+src/main/java/«PLUGIN_PATH»/«PLUGIN_NAME»Plugin.java
+```
+
+This **MUST** match the `implementation-class` listed as per Step 1
+
+The file should contain the following
+
+```
+package «PLUGIN.PACKAGE»;
+
+import org.gradle.api.Plugin;
+import org.gradle.api.Project;
+
+public class «PLUGIN_NAME»Plugin implements Plugin<Project> {
+
+	@Override
+	public void apply(Project project) {
+		project.getExtensions().create("«PLUGIN_NAME»", «PLUGIN_NAME»PluginExtension.class);
+
+		project.getTasks().create("«PLUGIN_TASK_NAME»", «PLUGIN_NAME»Task.class);
+	}
+}
+
+```
+
+## Step 3 - create the `PluginExtension.java` file
+
+Create a file located at:
+
+```
+src/main/java/«PLUGIN_PATH»/«PLUGIN_NAME»PluginExtension.java
+```
+
+The file should contain the following:
+
+```
+package «PLUGIN.PACKAGE»;
+
+
+public class «PLUGIN_NAME»PluginExtension {
+	// here you can put your member variables
+
+	// don't forget to create getters/setters for all of the member variables
+}
+```
+
+## Step 4 - create the `Task.java` file
+
+Create a file located at:
+
+```
+src/main/java/«PLUGIN_PATH»/«PLUGIN_NAME»Task.java
+```
+
+The file should contain the following:
+
+```
+package «PLUGIN.PACKAGE»;
+
+import org.gradle.api.DefaultTask;
+import org.gradle.api.logging.Logger;
+import org.gradle.api.tasks.TaskAction;
+
+public class «PLUGIN_NAME»Task extends DefaultTask {
+	private Logger logger;
+	private «PLUGIN_NAME»PluginExtension extension;
+
+	public JavaSampleHelloTask() {
+		setGroup("«PLUGIN_GROUP»");
+		setDescription("«PLUGIN_DESCRIPTION»");
+
+		this.logger = getProject().getLogger();
+	}
+
+	@TaskAction
+	public void generate() {
+		extension = getProject().getExtensions().findByType(«PLUGIN_NAME»PluginExtension.class);
+
+		if (extension == null) {
+			extension = new «PLUGIN_NAME»Extension();
+		}
+
+		logger.info("Logging something, this will only be seen if the gradle task is invoked with --info");
+	}
+}
+```
+
+## Step 5 - create the `build-initial.gradle` file
+
+Use the `./build-initial.gradle` file as a starting point, you will need to 
+update the following values:
+
+```
+// textual information for this project
+group = '«PLUGIN_ARTEFACT_BASE»'
+archivesBaseName = '«PLUGIN_NAME»'
+description = """«PLUGIN_DESCRIPTION»"""
+
+version = '1.0.0'
+```
+
+## Step 6 - create the `build.gradle` file
+
+Use the `./build.gradle` file as a starting point, you will need to 
+update the values in the file as per step 5 above.
+
+
