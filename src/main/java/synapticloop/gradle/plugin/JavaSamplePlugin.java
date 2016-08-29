@@ -29,8 +29,16 @@ public class JavaSamplePlugin implements Plugin<Project> {
 
 	@Override
 	public void apply(Project project) {
+		// this will register the extension point, such that in your gradle build 
+		// file you can pass in configuration items into the task
 		project.getExtensions().create("javaSample", JavaSamplePluginExtension.class);
-		project.getTasks().create("javaSample", JavaSampleTask.class);
-	}
 
+		// Register the task named 'javaSampleHello', which can then be invoked 
+		// with a simple gradle javaSampleHello
+		project.getTasks().create("javaSampleHello", JavaSampleHelloTask.class);
+
+		// Register the task named 'javaSampleGoodbye', which can then be invoked 
+		// with a simple gradle javaSampleGoodbye
+		project.getTasks().create("javaSampleGoodbye", JavaSampleGoodbyeTask.class);
+	}
 }

@@ -26,7 +26,7 @@ plugins {
 
 // textual information for this project
 group = 'synapticloop'
-archivesBaseName = 'gradle-plugin-java-sample'
+archivesBaseName = 'javaSample'
 description = """An example gradle plugin"""
 
 version = '1.0.0'

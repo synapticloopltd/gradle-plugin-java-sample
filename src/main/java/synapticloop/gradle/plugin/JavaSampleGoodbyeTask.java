@@ -17,23 +17,46 @@ package synapticloop.gradle.plugin;
  */
 
 import org.gradle.api.DefaultTask;
+import org.gradle.api.logging.Logger;
 import org.gradle.api.tasks.TaskAction;
 
-public class JavaSampleTask extends DefaultTask {
+public class JavaSampleGoodbyeTask extends DefaultTask {
+	private Logger logger;
+	private JavaSamplePluginExtension extension;
 	/**
-	 * Instantiate a new Java Sample Task and set the group and description
+	 * Instantiate a new Java Sample Goodbye Task and set the group and description
 	 */
-	public JavaSampleTask() {
+	public JavaSampleGoodbyeTask() {
 		setGroup("Sample");
-		setDescription("This is a sample plugin");
+		setDescription("This is a sample plugin that says goodbye");
+
+		this.logger = getProject().getLogger();
 	}
 
 	@TaskAction
 	public void generate() {
-		JavaSamplePluginExtension extension = getProject().getExtensions().findByType(JavaSamplePluginExtension.class);
+		extension = getProject().getExtensions().findByType(JavaSamplePluginExtension.class);
 
 		if (extension == null) {
 			extension = new JavaSamplePluginExtension();
+		}
+
+		logger.info("Invoking the goodbye task");
+
+		output();
+
+		if(extension.getRepeat()) {
+			output();
+		}
+	}
+
+	private void output() {
+		if(extension.getNames().size() != 0) {
+			for(String name: extension.getNames()) {
+				logger.lifecycle(String.format("%s says: '%s'", name, extension.getGoodbyeText()));
+			}
+		} else {
+			logger.lifecycle(extension.getGoodbyeText());
 		}
 	}
 }

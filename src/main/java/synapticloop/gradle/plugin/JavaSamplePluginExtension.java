@@ -1,5 +1,8 @@
 package synapticloop.gradle.plugin;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /*
  * Copyright (c) 2016 Synapticloop.
  * 
@@ -17,5 +20,24 @@ package synapticloop.gradle.plugin;
  */
 
 public class JavaSamplePluginExtension {
+	private String helloText = "Hello World!";
+	private String goodbyeText = "Good-bye Cruel World!";
+	private boolean repeat = false;
+	private List<String> names = new ArrayList<String>();
 
+	public String getHelloText() { return this.helloText; }
+
+	public void setHelloText(String helloText) { this.helloText = helloText; }
+
+	public String getGoodbyeText() { return this.goodbyeText; }
+
+	public void setGoodbyeText(String goodbyeText) { this.goodbyeText = goodbyeText; }
+
+	public boolean getRepeat() { return this.repeat; }
+
+	public void setRepeat(boolean repeat) { this.repeat = repeat; }
+
+	public List<String> getNames() { return this.names; }
+
+	public void setNames(List<String> names) { this.names = names; }
 }
